@@ -1,0 +1,56 @@
+name: Release CLI
+
+on:
+  push:
+    tags:
+      - 'v*'   # 推送 v1.0.0 之类标签时触发
+
+permissions:
+  contents: write   # 上传 Release 需要写权限
+
+jobs:
+  build:
+    name: Build & Upload
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: windows
+            goarch: amd64
+            ext: .exe
+          - goos: darwin
+            goarch: amd64
+            ext: ''
+          - goos: darwin
+            goarch: arm64
+            ext: ''
+          - goos: linux
+            goarch: amd64
+            ext: ''
+          - goos: linux
+            goarch: arm64
+            ext: ''
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.4'
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          BINARY_NAME=spider${{ matrix.ext }}
+          go build -trimpath -ldflags "-s -w" -o "$BINARY_NAME" ./cmd/spider
+          zip spider-${{ matrix.goos }}-${{ matrix.goarch }}.zip "$BINARY_NAME" README.md LICENSE
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: spider-${{ matrix.goos }}-${{ matrix.goarch }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
