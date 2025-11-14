@@ -45,8 +45,16 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
         run: |
           BINARY_NAME=spider${{ matrix.ext }}
-          go build -trimpath -ldflags "-s -w" -o "$BINARY_NAME" ./cmd/spider
-          zip spider-${{ matrix.goos }}-${{ matrix.goarch }}.zip "$BINARY_NAME" README.md LICENSE
+          go build -trimpath -ldflags "-s -w" -o "$BINARY_NAME" .
+          if [ -f README.md ]; then
+            README=README.md
+          elif [ -f readme.md ]; then
+            README=readme.md
+          else
+            echo "No README found (README.md or readme.md); aborting"
+            exit 1
+          fi
+          zip spider-${{ matrix.goos }}-${{ matrix.goarch }}.zip "$BINARY_NAME" "$README" LICENSE
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
