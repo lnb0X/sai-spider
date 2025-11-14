@@ -1,13 +1,13 @@
 package main
 
 import (
-    "os"
 	"fmt"
-	"time"
-	"strings"
 	"net/url"
+	"os"
 	"regexp"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -24,7 +24,7 @@ func Bing_search(key_word string, count int) {
 	for len(urls) < count {
 		params := url.Values{}
 		params.Add("q", key_word)
-		params.Add("first", strconv.Itoa(page*35 + 1))
+		params.Add("first", strconv.Itoa(page*35+1))
 		params.Add("count", "35")
 		searchURL := "https://cn.bing.com/images/search?" + params.Encode()
 
